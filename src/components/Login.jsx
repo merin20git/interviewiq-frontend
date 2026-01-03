@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import axios from "axios";
+import api from "../services/api";
+
+//import axios from "axios";
 import { useNavigate, Link } from "react-router-dom"; // 👈 Import Link
 
 function Login() {
@@ -18,7 +20,7 @@ function Login() {
     setMessage(""); // Clear previous messages
 
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", form);
+      const res = await api.post("/api/auth/login", form);
 
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("userId", res.data.user._id);
