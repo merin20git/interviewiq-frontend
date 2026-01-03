@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import api from "../services/api";
 
-//import axios from "axios";
 import { useNavigate, Link } from "react-router-dom"; // 👈 Import Link
 
 function Login() {
