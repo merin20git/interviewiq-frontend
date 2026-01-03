@@ -72,9 +72,13 @@ const InterviewSession = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-      const res = await axios.get(`http://localhost:5000/api/interview/session/${id}/question`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await axios.get(
+  `https://interviewiq-backend-rd38.onrender.com/api/interview/session/${id}/question`,
+  {
+    headers: { Authorization: `Bearer ${token}` }
+  }
+);
+
       
       if (res.data.completed || res.data.shouldRedirectToSummary) {
         console.log("🎯 Interview completed, redirecting to summary:", res.data);
@@ -117,10 +121,13 @@ const InterviewSession = () => {
         // Try to fetch session details to see if it's completed
         try {
           const token = localStorage.getItem("token");
-          const sessionRes = await axios.get(`http://localhost:5000/api/interview/session/${id}`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          
+       const sessionRes = await axios.get(
+  `https://interviewiq-backend-rd38.onrender.com/api/interview/session/${id}`,
+  {
+    headers: { Authorization: `Bearer ${token}` }
+  }
+);
+
           if (sessionRes.data.status === 'completed') {
             console.log("🎯 Session is completed, redirecting to summary");
             setMessage("Interview completed! Redirecting to results...");
@@ -153,10 +160,13 @@ const InterviewSession = () => {
     try {
       // Check session status before starting recording
       const token = localStorage.getItem("token");
-      const sessionCheck = await axios.get(`http://localhost:5000/api/interview/session/${sessionId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
+      const sessionCheck = await axios.get(
+  `https://interviewiq-backend-rd38.onrender.com/api/interview/session/${sessionId}`,
+  {
+    headers: { Authorization: `Bearer ${token}` }
+  }
+);
+
       if (sessionCheck.data.status !== 'active') {
         setMessage("Session is no longer active. Please start a new interview.");
         navigate("/setup");
@@ -230,14 +240,17 @@ const InterviewSession = () => {
       setProcessingController(controller);
       const timeoutId = setTimeout(() => controller.abort(), 90000);
 
-      const res = await axios.post(`http://localhost:5000/api/interview/session/${sessionId}/voice-answer`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-        signal: controller.signal,
-        timeout: 90000
-      });
+      const res = await axios.post(
+  `https://interviewiq-backend-rd38.onrender.com/api/interview/session/${sessionId}/voice-answer`,
+  formData,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "multipart/form-data",
+    },
+    timeout: 90000
+  }
+);
 
       clearTimeout(timeoutId);
 
@@ -341,17 +354,18 @@ const InterviewSession = () => {
       console.log("Submitting answer:", { sessionId, answerLength: finalAnswer.length, isTranscribed });
       
       const res = await axios.post(
-        `http://localhost:5000/api/interview/session/${sessionId}/answer`,
-        {
-          answer: finalAnswer,
-          isVoiceAnswer: isTranscribed,
-          audioFilePath: audioFilePath
-        },
-        { 
-          headers: { Authorization: `Bearer ${token}` },
-          timeout: 60000 // 60 second timeout for AI processing
-        }
-      );
+  `https://interviewiq-backend-rd38.onrender.com/api/interview/session/${sessionId}/answer`,
+  {
+    answer: finalAnswer,
+    isVoiceAnswer: isTranscribed,
+    audioFilePath
+  },
+  {
+    headers: { Authorization: `Bearer ${token}` },
+    timeout: 60000
+  }
+);
+
       
       const data = res.data;
       console.log("Answer submission response:", data);
