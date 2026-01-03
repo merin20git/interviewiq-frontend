@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import axios from "axios";
+import api from "../services/api";
+
+//import axios from "axios";
 import { Link, useNavigate } from "react-router-dom"; // 👈 Import Link and useNavigate for redirection
 
 function Signup() {
@@ -18,7 +20,7 @@ function Signup() {
     setMessage(""); // Clear previous messages
 
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/signup", form);
+      const res = await api.post("/api/auth/signup", form);
 
       // Success Message and Auto-Redirect
       setMessage(
