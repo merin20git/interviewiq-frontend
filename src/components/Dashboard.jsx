@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../services/api";
+
+//import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "./Header";
 
@@ -21,9 +23,10 @@ function Dashboard() {
     const fetchData = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get("http://localhost:5000/api/dashboard", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await api.get("/api/dashboard", {
+  headers: { Authorization: `Bearer ${token}` },
+});
+
         setInterviews(res.data.interviews || []);
         setDashboardData(res.data);
       } catch (err) {
