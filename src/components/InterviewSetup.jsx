@@ -103,11 +103,15 @@ const handleStartInterview = async () => {
     }
   } catch (err) {
     console.error(err);
-    setError("Failed to start interview. Please try again.");
+    setError(
+      err.response?.data?.error ||
+      "Failed to start interview. Please try again."
+    );
   } finally {
     setLoading(false);
   }
 };
+
 
   return (
     <div className="container-fluid d-flex flex-column justify-content-center align-items-center min-vh-100 bg-light p-4">
