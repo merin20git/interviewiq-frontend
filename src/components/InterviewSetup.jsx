@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import axios from "axios";
+import React, { useState, useEffect } from "react";
+import api from "../services/api";
 import { useNavigate } from "react-router-dom";
+
 
 const InterviewSetup = () => {
   const [role, setRole] = useState("");
@@ -14,55 +15,49 @@ const InterviewSetup = () => {
   const navigate = useNavigate();
 
   // Check for existing resume on component mount
-  React.useEffect(() => {
-    const checkActiveResume = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const res = await axios.get("http://localhost:5000/api/resume/active", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        
-        if (res.data.hasResume) {
-          setActiveResume(res.data.resume);
-          setResumeUploaded(true);
-        }
-      } catch (error) {
-        console.log("No active resume found");
-      }
-    };
-    
-    checkActiveResume();
-  }, []);
-
-  const handleResumeUpload = async (file) => {
-    if (!file) return;
-    
+useEffect(() => {
+  const checkActiveResume = async () => {
     try {
-      setResumeUploading(true);
-      setError("");
-      
-      const formData = new FormData();
-      formData.append("resume", file);
-      
-      const token = localStorage.getItem("token");
-      const res = await axios.post("http://localhost:5000/api/resume/upload", formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data"
-        }
-      });
-      
-      setActiveResume(res.data.resume);
-      setResumeUploaded(true);
-      setResumeFile(null);
-      
+      const res = await api.get("/api/resume/active");
+
+      if (res.data.hasResume) {
+        setActiveResume(res.data.resume);
+        setResumeUploaded(true);
+      }
     } catch (error) {
-      console.error("Resume upload error:", error);
-      setError(error.response?.data?.error || "Failed to upload resume");
-    } finally {
-      setResumeUploading(false);
+      console.log("No active resume found");
     }
   };
+
+  checkActiveResume();
+}, []);
+
+
+const handleResumeUpload = async (file) => {
+  if (!file) return;
+
+  try {
+    setResumeUploading(true);
+    setError("");
+
+    const formData = new FormData();
+    formData.append("resume", file);
+
+    const res = await api.post("/api/resume/upload", formData, {
+      headers: { "Content-Type": "multipart/form-data" }
+    });
+
+    setActiveResume(res.data.resume);
+    setResumeUploaded(true);
+    setResumeFile(null);
+  } catch (error) {
+    console.error("Resume upload error:", error);
+    setError(error.response?.data?.error || "Failed to upload resume");
+  } finally {
+    setResumeUploading(false);
+  }
+};
+
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -86,44 +81,33 @@ const InterviewSetup = () => {
     }
   };
 
-  const handleStartInterview = async () => {
-    if (!role.trim()) {
-      setError("Please enter a role to continue.");
-      return;
+const handleStartInterview = async () => {
+  if (!role.trim()) {
+    setError("Please enter a role to continue.");
+    return;
+  }
+
+  try {
+    setLoading(true);
+    setError("");
+
+    const res = await api.post("/api/interview/start", {
+      role,
+      useResume: useResume && resumeUploaded
+    });
+
+    if (res.data.sessionId) {
+      localStorage.setItem("selectedRole", role);
+      localStorage.setItem("sessionId", res.data.sessionId);
+      navigate("/interview/session");
     }
-
-    try {
-      setLoading(true);
-      setError("");
-      const token = localStorage.getItem("token");
-
-      // Start the interview session in backend
-      const res = await axios.post(
-        "http://localhost:5000/api/interview/start",
-        { 
-          role,
-          useResume: useResume && resumeUploaded
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      // Save session and role for InterviewSession page
-      if (res.data.sessionId) {
-        localStorage.setItem("selectedRole", role);
-        localStorage.setItem("sessionId", res.data.sessionId);
-        navigate("/interview/session");
-      }
-    } catch (err) {
-      console.error(err);
-      setError("Failed to start interview. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (err) {
+    console.error(err);
+    setError("Failed to start interview. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="container-fluid d-flex flex-column justify-content-center align-items-center min-vh-100 bg-light p-4">
